@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -19,9 +18,16 @@ public final class RailroadsTest {
 
     private static @NotNull
     List<Boolean> solve(ISolver impl, String cases, int n) {
-        try (var scanner = new Scanner(cases)) {
-            assertTrue(scanner.hasNext());
-            return Railroads.solveMultiple(impl, scanner, n);
+        final var startTime = System.nanoTime();
+        try {
+            try (var scanner = new Scanner(cases)) {
+                assertTrue(scanner.hasNext());
+                return Railroads.solveMultiple(impl, scanner, n);
+            }
+        } finally {
+            // Absolutely wrong way to benchmark anything.
+            // Can give a first impression even without profiler though.
+            System.err.println(System.nanoTime() - startTime);
         }
     }
 
@@ -29,19 +35,6 @@ public final class RailroadsTest {
         var solverResults = Arrays.stream(SOLVERS).map(x -> solve(x, cases, n)).collect(Collectors.toList());
         solverResults.stream().skip(1).forEach(x -> assertIterableEquals(solverResults.get(0), x));
         return solverResults.get(0);
-    }
-
-    /* todo: remove */
-    @Test
-    void debug() {
-        var result = solve(
-                NAIVE,
-                """
-                        3 2 5 1 4
-                        0""",
-                5
-        );
-        assertIterableEquals(Collections.singletonList(false), result);
     }
 
     @Test

@@ -7,8 +7,15 @@ import java.util.function.BiConsumer;
 
 public class Cluster {
     public final BallColor color;
+
+    // ballSet is actually redundant, itemMap can be made a single source of truth.
+    // But it's a nice perf optimization, and I totally don't care about memory in these tasks.
+    // If I did, I would've written these tasks in a language where I'm certain how value types,
+    // reference types and arrays represented in memory and interop with each other. That is, C/C++/C#.
     private Set<Ball> ballSet = new HashSet<>();
+
     private TreeMap<Integer, List<ClusterItem>> itemMap = new TreeMap<>();
+
     private Point position;
 
     public Cluster(@NotNull Point point, @NotNull Ball ball) {
@@ -52,6 +59,7 @@ public class Cluster {
             return v;
         });
 
+        // skip updating position in Cluster constructor
         if (updatePosition) {
             final var oldColumn = position.column();
 
@@ -68,7 +76,9 @@ public class Cluster {
     }
 
     public void mergeCluster(@NotNull Cluster cluster) {
-        // TODO: faster merge using TreeMap impl details
+        // TODO: faster merge using Cluster add impl details
+        // upd: negative, the impact of this turned out to be very low during perf profiling.
+        //      this will work 100%.
         for (var e : cluster.itemMap.entrySet())
             for (var v : e.getValue())
                 add(v, true);
